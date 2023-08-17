@@ -41,6 +41,7 @@ Please follow the below steps to run the DESeq2-shiny container on a cluster:
    ##SBATCH --mail-user=youremail@missouri.edu  # email address for notifications
    ##SBATCH --mail-type=END,FAIL  # which type of notifications to send
    #SBATCH -J DESeq2-shiny
+   ##SBATCH --account ircf 
    ```
 
 6. Submit the job to the SLURM scheduler using the below command:
