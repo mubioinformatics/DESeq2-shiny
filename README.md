@@ -1,60 +1,54 @@
-![R-CMD-check](https://github.com/bixBeta/DESeq2-shiny/workflows/R-CMD-check/badge.svg)
+## Guide to Run DESeq2-shiny Container on a Cluster
 
-### PCA-Explorer + DGE analysis using DESeq2-Shiny
+Please follow the below steps to run the DESeq2-shiny container on a cluster:
 
-The limited version of this app can be accessed here: https://bixbeta.shinyapps.io/PCA-Explorer/
+1. Remotely access any login node's terminal using the following command:
+   ```
+   ssh ${USER}@lewis.rnet.missouri.edu
 
-To run locally (strongly recommended), use the following instructions:
+   ssh ${USER}@lewis42.rnet.missouri.edu
 
-git clone this repository using `git clone https://github.com/bixBeta/DESeq2-shiny.git`<br> or using the green (Code/Clone) button on top of this page. <br>
-cd to `DESeq2-shiny/PCA-Explorer`<br>
-copy the path for the ui and server files by using `pwd`, we will need this path later. 
+   ssh ${USER}@lewis4-dtn.rnet.missouri.edu
+   
+   ssh ${USER}@lewis4-dtn1.rnet.missouri.edu
+   ```
 
+2. Copy the DESeq2-shiny.job file to your home directory using the below command:
+   ```
+   cp /storage/hpc/group/ircf/software/singularity_DESeq2-shiny/DESeq2-shiny.job ~/DESeq2-shiny.job
+   ```
 
+3. Navigate to your home directory using the following command:
+   ```
+   cd
+   ```
 
-Launch R Console on a Mac or PC and INSTALL the following packages:
+4. Check for an available node using the below command:
+   ```
+   sinfo --state=idle
+   ```
 
-`if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")`<br>
-`if (!requireNamespace("DESeq2", quietly = TRUE))
-  BiocManager::install("DESeq2")`<br>
-`if (!requireNamespace("dplyr", quietly = TRUE))
- install.packages("dplyr")`<br>
-`if (!requireNamespace("plotly", quietly = TRUE))
-  install.packages("plotly")`<br>
-`if (!requireNamespace("shiny", quietly = TRUE))
-  BiocManager::install("shiny")`<br>
-`if (!requireNamespace("tibble", quietly = TRUE))
- install.packages("tibble")`<br>
-`if (!requireNamespace("DT", quietly = TRUE))
-  install.packages("DT")`<br>
-`if (!requireNamespace("shinyjs", quietly = TRUE))
-  BiocManager::install("shinyjs")`<br>
+5. Modify the "DESeq2-shiny.job" file as per your requirements based on Partition, Node, Memory, MYDATA, etc.:
+   ```
+   #!/bin/bash
+   ##SBATCH -p r630-hpc3
+   ##SBATCH -w lewis4-r630-hpc3-node548
+   #SBATCH -p Gpu
+   #SBATCH -t 0-02:00  # time (days-hours:minutes)
+   #SBATCH --ntasks-per-node=10
+   #SBATCH --mem=100G
+   #SBATCH --output=/home/%u/log_DESeq2-shiny.job.%j
+   ##SBATCH --mail-user=youremail@missouri.edu  # email address for notifications
+   ##SBATCH --mail-type=END,FAIL  # which type of notifications to send
+   #SBATCH -J DESeq2-shiny
+   ```
 
-Once all packages are installed:<br>
+6. Submit the job to the SLURM scheduler using the below command:
+   ```
+   sbatch DESeq2-shiny.job
+   ```
 
-From R Console type `shiny::runApp('~/path/to/DESeq2-shiny/PCA-Explorer')# (paste the copied path here)` <br>
-Alternatively, from a bash terminal type `R -e shiny::runApp('~/path/to/DESeq2-shiny/PCA-Explorer')`<br>
-Copy the ip address and paste it in a web browser to launch the app
-
-
-### countMatrix and target file
-
-Example CountMatrix and metadata target files are available in the `PCA-Explorer/example` folder.
-
-In the `target` file, `label` and `group` columns are mandatory. 
-
-In the `label` column, please refrain from using any special characters, only `.` is acceptable `e.g. Sample.1`
-
-The `label` column fields must match the column names of the `countMatrix.txt` file. <br> 
-`e.g. Sample.1 label must have a corresponding Sample.1 counts column in the countMatrix.txt file`
-
-All labels are case-sensitive. 
-
-
-### Demo
-
-![alt text](assets/Demo.gif)
-
-
-
+7. Check the job log for instructions by running the below command:
+   ```
+   cat log_DESeq2-shiny.job.*
+   ```
